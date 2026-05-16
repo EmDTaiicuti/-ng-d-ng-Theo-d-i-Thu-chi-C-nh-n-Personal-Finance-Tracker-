@@ -14,18 +14,14 @@
 #define BOLD    "\033[1m"       // In đậm
 
 // khai báo sẵn các chức năng của hàm 
-Node* createNode(Transaction t);
-void appendNode(Node** head, Node* newNode);
 void addTransaction(Node** head); // đã sửa lỗi thiếu tham số
 void displayTransactions(Node* head); // thêm tham số
 void searchTransaction(Node* head); // thêm tham số truyền vào
 void deleteTransaction(Node** head); // thêm tham số con trỏ bậc 2
-long long calculateTotalRecursive(Node* head, int type);
 void showStatistics(Node** head);// 
 void loadFromFile(Node** head); // thêm tham số
 void saveToFile(Node* head); // thêm tham số
 void freeMemory(Node** head); // khai báo thêm hàm dọn rác
-void showMenu();
 // ==========================================
 // MODULE: DANH SACH LIEN KET & XU LY DU LIEU
 // ==========================================
@@ -42,37 +38,15 @@ Node* createNode(Transaction t) {
     newNode->next = NULL;
     return newNode;
 }
-// them ham phu /them node vao cuoi danh sach - tai su dung o nhieu cho
-void appendNode(Node** head, Node* newNode) {
-    if (newNode == NULL) return;
-    if (*head == NULL) {
-        *head = newNode;
-        return;
-    }
-    Node* temp = *head;
-    while (temp->next != NULL) temp = temp->next;
-    temp->next = newNode;
-}
 
 // hàm thêm giao dịch do người dùng nhập vào Danh sách (Thêm vào cuối - Insert at Tail)
-void addTransaction(Node** head){
 Transaction t;
-// tính id tự động
-    int maxId = 0;
-    Node* temp = *head;
-    while (temp != NULL) {
-        if (temp->data.id > maxId) maxId = temp->data.id;
-        temp = temp->next;
-    }
-    t.id = maxId + 1;
     printf(YELLOW "\n--- NHAP THONG TIN GIAO DICH MOI ---\n" RESET);
     
     printf("Nhap Ma ID (so nguyen): "); scanf("%d", &t.id);
     printf("Nhap Ngay (DD/MM/YYYY): "); scanf("%s", t.date);
- // them gioi han do dai de tranh buffer overflow 
-    scanf("%14s", t.date);
     
-    // giao diện chọn nhanh danh mục 
+    // Giao diện chọn nhanh Danh mục (Chống lười)
     printf(CYAN "\n   --- CHON DANH MUC ---\n" RESET);
     printf("   1. An uong\n");
     printf("   2. Tien nha / Sinh hoat\n");
@@ -82,11 +56,7 @@ Transaction t;
     printf("-> Chon so (1-5): ");
     
     int catChoice;
-     if (scanf("%d", &catChoice) != 1) {
-        printf(RED "[!] Lua chon khong hop le!\n" RESET);
-        while (getchar() != '\n');
-        return;
-    }
+    scanf("%d", &catChoice);
     switch(catChoice) {
         case 1: strcpy(t.category, "An_uong"); break;
         case 2: strcpy(t.category, "Sinh_hoat"); break;
@@ -96,27 +66,11 @@ Transaction t;
             printf("Nhap ten danh muc tu do (khong dau cach): ");
             scanf("%s", t.category);
     }
-    // sua lo logic
-    printf("  Nhap So tien (VND): ");
-    if (scanf("%lld", &t.amount) != 1 || t.amount < 0) {
-        printf(RED "[!] So tien khong hop le!\n" RESET);
-        while (getchar() != '\n');
-        return;
-    }
-     printf("  Loai giao dich (1=Thu / 0=Chi): ");
-    if (scanf("%d", &t.type) != 1 || (t.type != 0 && t.type != 1)) {
-        printf(RED "[!] Loai giao dich khong hop le! Chi nhap 0 hoac 1.\n" RESET);
-        while (getchar() != '\n');
-        return;
-    }
-    // dùng thêm hàm phụ  do viết lại logic 
-     Node* newNode = createNode(t);
-    appendNode(head, newNode);
+    
+    printf("Nhap So tien (VND): "); scanf("%lld", &t.amount);
+    printf("Loai giao dich (1 la Thu, 0 la Chi): "); scanf("%d", &t.type);
 
-    printf(GREEN "\n  => Da them giao dich ID=[%d] danh muc [%s] thanh cong!\n" RESET,
-           t.id, t.category);
-}
-
+    // ... (Phần logic gắn Node vào danh sách giữ nguyên như cũ) ...
     // gọi máy tạo node
     Node* newNode = createNode(t);
     if (*head == NULL) *head = newNode;
