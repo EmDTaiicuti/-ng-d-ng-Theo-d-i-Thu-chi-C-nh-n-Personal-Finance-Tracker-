@@ -1,20 +1,4 @@
-/*
- * QUAN LY THU CHI CA NHAN v4.0
- * - Ngay tu dong (hom nay) hoac thu cong
- * - Chon loai TRUOC (0=Chi, 1=Thu) -> menu danh muc tuong ung
- * - Danh muc Chi: An_uong, Giai_tri, Tien_nha, Sinh_hoat, Mua_sam, Suc_khoe, Dau_tu
- * - Danh muc Thu: Luong, Thuong, Refund, Lai, Thu_khac
- * - So tien nhap sai -> nhap lai (khong ve menu chinh)
- * - Phan tich AI theo thang dung WinHTTP (Groq API - mien phi)
- * - Giao dien thong nhat (khung box chinh xac)
- *
- * FIX v4.1:
- *   - Sua loi double-escape dataBuf -> JSON loi
- *   - Tang buffer size (malloc) tranh stack overflow / snprintf bi cat
- *   - Groq API (llama-3.3-70b-versatile) - mien phi, khong can billing
- *   - In raw response khi parse that bai de de debug
- *   - Giai phong bo nho cap phat dong
- */
+/* 4.2 sửa giao diện cho khung*/
 
 #include <stdio.h>
 #include <stdlib.h>
