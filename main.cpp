@@ -21,7 +21,6 @@
 
 /* ==========================================
    BẢNG MÀU MỚI: DARK MINT - GREEN - CREAM
-   Dựa trên bảng màu bạn cung cấp (image_2.png)
    ========================================== */
 // `#5D7B6F`: Xanh rêu đậm - Màu nền chính
 #define C_BG        (Color){93,  123, 111, 255} 
