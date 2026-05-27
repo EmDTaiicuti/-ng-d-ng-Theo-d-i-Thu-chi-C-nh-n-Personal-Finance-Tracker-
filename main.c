@@ -1,25 +1,22 @@
 /* 4.2 sửa giao diện cho khung*/
-
+/*4.3 Sửa lỗi hiển thị bảng  cho chức năng AI */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> // thêm thư viện xử lý chuỗi
 #include <time.h>
 #include <windows.h>
-#include <winhttp.h>
 #include "structs.h"
-
-#pragma comment(lib, "winhttp.lib")
 
 // ==========================================
 // MAU ANSI
 // ==========================================
-#define RESET   "\033[0m"
-#define RED     "\033[1;31m"
-#define GREEN   "\033[1;32m"
-#define YELLOW  "\033[1;33m"
-#define CYAN    "\033[1;36m"
+#define RESET   "\033[0m"       // trả về màu mặc định
+#define RED     "\033[1;31m"    // đỏ (dùng cho báo lỗi và tiền chi)
+#define GREEN   "\033[1;32m"    // xanh lá (dùng cho thành công và tiền thu)
+#define YELLOW  "\033[1;33m"    // vàng (dùng cho tiêu đề)
+#define CYAN    "\033[1;36m"    // xanh lơ (dùng cho khung viền bảng)
 #define MAGENTA "\033[1;35m"
-#define BOLD    "\033[1m"
+#define BOLD    "\033[1m"       // in đậm
 #define WHITE   "\033[1;37m"
 
 #define MW 43  // menu width tong
@@ -27,16 +24,17 @@
 // ==========================================
 // KHAI BAO HAM
 // ==========================================
-void        addTransaction(Node** head);
-void        displayTransactions(Node* head);
-void        searchTransaction(Node* head);
-void        deleteTransaction(Node** head);
+// khai báo sẵn các chức năng của hàm
+void        addTransaction(Node** head); // đã sửa lỗi thiếu tham số
+void        displayTransactions(Node* head); // thêm tham số
+void        searchTransaction(Node* head); // thêm tham số truyền vào
+void        deleteTransaction(Node** head); // thêm tham số con trỏ bậc 2
 void        showStatistics(Node* head);
 void        analyzeAI(Node* head);
-void        loadFromFile(Node** head);
-void        saveToFile(Node* head);
-void        freeMemory(Node** head);
-Node*       createNode(Transaction t);
+void        loadFromFile(Node** head); // thêm tham số
+void        saveToFile(Node* head); // thêm tham số
+void        freeMemory(Node** head); // khai báo thêm hàm dọn rác
+Node* createNode(Transaction t);
 int         getNextId(Node* head);
 void        getCurrentDate(char* buf);
 void        showMenu();
@@ -69,12 +67,14 @@ int getNextId(Node* head) {
     return maxId + 1;
 }
 
+// hàm cấp phát bộ nhớ động tạo nọt mới
 Node* createNode(Transaction t) {
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL) {
         printf(RED "[!] Loi: Khong the cap phat bo nho!\n" RESET);
         return NULL;
     }
+    // đổ dữ liệu vào node và cho con trỏ trỏ vào null
     newNode->data = t;
     newNode->next = NULL;
     return newNode;
@@ -126,6 +126,7 @@ void printBoxBot(int w) {
 // ==========================================
 // 1. THEM GIAO DICH
 // ==========================================
+// hàm thêm giao dịch do người dùng nhập vào Danh sách (Thêm vào cuối - Insert at Tail)
 void addTransaction(Node** head) {
     Transaction t;
     t.id = getNextId(*head);
@@ -148,6 +149,7 @@ void addTransaction(Node** head) {
     }
 
     // ---- BUOC 2: Chon danh muc theo loai ----
+    // giao diện chọn nhanh danh mục (Chống lười)
     int catChoice;
     if (t.type == 0) {
         printf(CYAN "\n --- DANH MUC CHI ---\n" RESET);
@@ -231,10 +233,8 @@ void addTransaction(Node** head) {
         getCurrentDate(t.date);
         printf(GREEN " => Ngay tu dong: %s\n" RESET, t.date);
     } else {
-        // So ngay toi da theo tung thang (nam nhuan tinh sau)
         int maxDays[13] = {0, 31,28,31,30,31,30,31,31,30,31,30,31};
 
-        // -- Chon NAM --
         int inputYear;
         printf(YELLOW " Nhap Nam (1900 - 2026): " RESET);
         while (1) {
@@ -246,7 +246,6 @@ void addTransaction(Node** head) {
             printf(RED " [!] Nam phai tu 1900 den 2026: " RESET);
         }
 
-        // -- Chon THANG --
         int inputMonth;
         printf(YELLOW " Nhap Thang (1 - 12): " RESET);
         while (1) {
@@ -258,11 +257,9 @@ void addTransaction(Node** head) {
             printf(RED " [!] Thang phai tu 1 den 12: " RESET);
         }
 
-        // Tinh nam nhuan: chia het 4, tru chia het 100, ngoai tru chia het 400
         int isLeap = (inputYear % 4 == 0 && inputYear % 100 != 0) || (inputYear % 400 == 0);
         if (inputMonth == 2 && isLeap) maxDays[2] = 29;
 
-        // -- Chon NGAY --
         int inputDay;
         printf(YELLOW " Nhap Ngay (1 - %d): " RESET, maxDays[inputMonth]);
         while (1) {
@@ -309,12 +306,14 @@ void addTransaction(Node** head) {
 // ==========================================
 // 2. HIEN THI DANH SACH
 // ==========================================
+// hàm hiển thị danh sách giao dịch dưới dạng bảng (Giao diện mới)
 void displayTransactions(Node* head) {
     if (head == NULL) {
         printf(RED "\n[!] Danh sach giao dich hien dang trong!\n" RESET);
         return;
     }
 
+    // Thanh tiêu đề đóng khung viền kép
     printTableTop();
     printf(CYAN " \xba" YELLOW " %-4s " CYAN "\xba" YELLOW " %-10s " CYAN "\xba" YELLOW " %-18s " CYAN "\xba" YELLOW " %-18s " CYAN "\xba" YELLOW " %-7s " CYAN "\xba\n" RESET, 
            "ID", "Ngay", "Danh muc", "So tien (VND)", "Loai");
@@ -340,6 +339,7 @@ void displayTransactions(Node* head) {
 // ==========================================
 // 3. TIM KIEM
 // ==========================================
+// hàm tìm kiếm giao dịch theo danh mục (tìm gần đúng bằng strstr)
 void searchTransaction(Node* head) {
     if (head == NULL) {
         printf(RED "\n[!] Danh sach trong!\n" RESET);
@@ -385,6 +385,7 @@ void searchTransaction(Node* head) {
 // ==========================================
 // 4. XOA GIAO DICH
 // ==========================================
+// hàm xóa giao dịch theo mã ID
 void deleteTransaction(Node** head) {
     if (*head == NULL) {
         printf(RED "\n[!] Danh sach trong!\n" RESET);
@@ -406,6 +407,7 @@ void deleteTransaction(Node** head) {
     Node* cur = *head;
     Node* prev = NULL;
 
+    // trường hợp 1: node cần xóa nằm ngay đầu danh sách (chính là head)
     if (cur != NULL && cur->data.id == deleteId) {
         *head = cur->next;
         free(cur);
@@ -413,6 +415,7 @@ void deleteTransaction(Node** head) {
         return;
     }
 
+    // trường hợp 2: tìm node cần xóa ở đoạn giữa hoặc cuối danh sách
     while (cur != NULL && cur->data.id != deleteId) {
         prev = cur;
         cur = cur->next;
@@ -423,6 +426,7 @@ void deleteTransaction(Node** head) {
         return;
     }
 
+    // thuật toán xóa: ngắt kết nối node hiện tại, nối node trước với node sau
     prev->next = cur->next;
     free(cur);
     printf(GREEN " => Da xoa giao dich ID: %d\n" RESET, deleteId);
@@ -431,12 +435,14 @@ void deleteTransaction(Node** head) {
 // ==========================================
 // 5. THONG KE TONG HOP
 // ==========================================
+// hàm đệ quy tính tổng tiền theo loại (1: Thu, 0: Chi) - yêu cầu chương 2
 long long calcTotal(Node* head, int type) {
     if (head == NULL) return 0;
     long long cur = (head->data.type == type) ? head->data.amount : 0;
     return cur + calcTotal(head->next, type);
 }
 
+// hàm hiển thị báo cáo tài chính tổng hợp
 void showStatistics(Node* head) {
     if (head == NULL) {
         printf(RED "\n[!] Khong co du lieu de thong ke!\n" RESET);
@@ -452,20 +458,20 @@ void showStatistics(Node* head) {
     snprintf(bufChi, sizeof(bufChi), "-%lld VND", chi);
     snprintf(bufDu, sizeof(bufDu), "%s%lld VND", (sodu >= 0) ? "+" : "", sodu);
 
-    printBoxTop(71);
-    printf(CYAN " \xba" YELLOW "%22s%s%23s" CYAN "\xba\n" RESET, "", "BAO CAO TAI CHINH TONG HOP", "");
-    printBoxMid(71);
+    printBoxTop(67);
+    printf(CYAN " \xba" YELLOW "%20s%s%21s" CYAN "\xba\n" RESET, "", "BAO CAO TAI CHINH TONG HOP", "");
+    printBoxMid(67);
     
-    int padThu = 71 - 13 - strlen(bufThu); if(padThu < 0) padThu = 0;
-    int padChi = 71 - 13 - strlen(bufChi); if(padChi < 0) padChi = 0;
+    int padThu = 67 - 13 - strlen(bufThu); if(padThu < 0) padThu = 0;
+    int padChi = 67 - 13 - strlen(bufChi); if(padChi < 0) padChi = 0;
     
     printf(CYAN " \xba" RESET " Tong Thu :  " GREEN "%s" RESET "%*s" CYAN "\xba\n" RESET, bufThu, padThu, "");
     printf(CYAN " \xba" RESET " Tong Chi :  " RED "%s" RESET "%*s" CYAN "\xba\n" RESET, bufChi, padChi, "");
     
-    printBoxMid(71);
+    printBoxMid(67);
     
     char* msg = (sodu >= 0) ? "[*] Tai chinh on dinh." : "[!] Vuot muc thu nhap!";
-    int padDu = 71 - 13 - strlen(bufDu) - 2 - strlen(msg); 
+    int padDu = 67 - 13 - strlen(bufDu) - 2 - strlen(msg); 
     if(padDu < 0) padDu = 0;
     
     if (sodu >= 0)
@@ -473,11 +479,13 @@ void showStatistics(Node* head) {
     else
         printf(CYAN " \xba" RESET " So Du    :  " RED "%s" RESET "  " RED "%s" RESET "%*s" CYAN "\xba\n" RESET, bufDu, msg, padDu, "");
     
-    printBoxBot(71);
+    printBoxBot(67);
 }
+
 // ==========================================
 // 6. PHAN TICH TAI CHINH (LOGIC C THUAN - KHONG CAN AI)
 // ==========================================
+// hàm lọc dữ liệu theo mốc thời gian và tự động đưa ra các mức cảnh báo chi tiêu
 void analyzeAI(Node* head) {
     if (head == NULL) {
         printf(RED "\n[!] Khong co du lieu!\n" RESET);
@@ -588,59 +596,144 @@ void analyzeAI(Node* head) {
     else if (thang == 0) snprintf(timeStr, sizeof(timeStr), "Nam %d", nam);
     else snprintf(timeStr, sizeof(timeStr), "Thang %d Nam %d", thang, nam);
 
-    // --- IN GIAO DIEN (QUOTE BLOCK) ---
+    // --- IN GIAO DIEN BOX ---
+    // BW = so ky tu noi dung (plain text, khong tinh ANSI escape)
+    // Cau truc moi dong: " \xba " (3) + content (BW) + "\xba" (1) = BW+4
+#define BW 63
+
+    // In dong plain text
+#define ROW_PLAIN(s) do { \
+    int _l = (int)strlen(s); \
+    printf(CYAN " \xba " RESET "%s", (s)); \
+    for(int _i=_l; _i<BW; _i++) putchar(' '); \
+    printf(CYAN "\xba\n" RESET); \
+} while(0)
+
+    // In dong header mau vang
+#define ROW_HDR(s) do { \
+    int _l = (int)strlen(s); \
+    printf(CYAN " \xba " YELLOW "%s" RESET, (s)); \
+    for(int _i=_l; _i<BW; _i++) putchar(' '); \
+    printf(CYAN "\xba\n" RESET); \
+} while(0)
+
+    // In dong trong
+#define ROW_EMPTY() do { \
+    printf(CYAN " \xba " RESET); \
+    for(int _i=0; _i<BW; _i++) putchar(' '); \
+    printf(CYAN "\xba\n" RESET); \
+} while(0)
+
+    // In dong co mau - col la bien const char* runtime
+    // plain_len = strlen(prefix + numstr + suffix) khong tinh mau
+#define ROW_MONEY(prefix, col, numstr, suffix, plain_len) do { \
+    printf(CYAN " \xba " RESET "%s%s%s" RESET "%s", (prefix),(col),(numstr),(suffix)); \
+    int _pad = BW - (plain_len); \
+    for(int _i=0; _i<_pad; _i++) putchar(' '); \
+    printf(CYAN "\xba\n" RESET); \
+} while(0)
+
+    // Tieu de canh giua
     char title[100];
     snprintf(title, sizeof(title), "PHAN TICH TAI CHINH (%s)", timeStr);
-    int padL = (71 - strlen(title)) / 2;
-    int padR = 71 - strlen(title) - padL;
+    int tlen = (int)strlen(title);
+    int padL = (BW + 2 - tlen) / 2;
+    int padR = (BW + 2) - tlen - padL;
+    if(padL < 1) padL = 1;
+    if(padR < 1) padR = 1;
 
-    printBoxTop(71);
+    printBoxTop(BW + 2);
     printf(CYAN " \xba" YELLOW "%*s%s%*s" CYAN "\xba\n" RESET, padL, "", title, padR, "");
-    printf(CYAN " \xcc"); for(int i=0;i<71;i++) putchar('\xcd'); printf("\xb9\n" RESET);
-    
-    // In ket qua phan tich
-    printf(CYAN " \xba " YELLOW "[1] TONG QUAN:\n" RESET);
-    printf(CYAN " \xba " RESET "  - Tong so giao dich: %d\n", count);
-    printf(CYAN " \xba " RESET "  - Tong Thu: " GREEN "%lld VND\n" RESET, thu);
-    printf(CYAN " \xba " RESET "  - Tong Chi: " RED "%lld VND\n" RESET, chi);
-    
-    printf(CYAN " \xba \n");
-    printf(CYAN " \xba " YELLOW "[2] DANH MUC NOI BAT:\n" RESET);
+    printBoxMid(BW + 2);
+
+    char buf[128], numStr[64];
+
+    // [1] TONG QUAN
+    ROW_HDR("[1] TONG QUAN:");
+
+    snprintf(buf, sizeof(buf), "  - Tong so giao dich: %d", count);
+    ROW_PLAIN(buf);
+
+    snprintf(numStr, sizeof(numStr), "%lld", thu);
+    snprintf(buf,    sizeof(buf),    "  - Tong Thu: %s VND", numStr);
+    ROW_MONEY("  - Tong Thu: ", GREEN, numStr, " VND", (int)strlen(buf));
+
+    snprintf(numStr, sizeof(numStr), "%lld", chi);
+    snprintf(buf,    sizeof(buf),    "  - Tong Chi: %s VND", numStr);
+    ROW_MONEY("  - Tong Chi: ", RED, numStr, " VND", (int)strlen(buf));
+
+    {
+        long long sodu_local = thu - chi;
+        const char* scol = sodu_local >= 0 ? GREEN : RED;
+        long long absVal = sodu_local < 0 ? -sodu_local : sodu_local;
+        snprintf(numStr, sizeof(numStr), "%s%lld", sodu_local >= 0 ? "+" : "-", absVal);
+        snprintf(buf,    sizeof(buf),    "  - So du:    %s VND", numStr);
+        ROW_MONEY("  - So du:    ", scol, numStr, " VND", (int)strlen(buf));
+    }
+
+    ROW_EMPTY();
+
+    // [2] DANH MUC NOI BAT
+    ROW_HDR("[2] DANH MUC NOI BAT:");
     if (chi > 0) {
-        printf(CYAN " \xba " RESET "  - Khoan tieu ton nhieu tien nhat: " RED "%s\n" RESET, maxCatName);
-        printf(CYAN " \xba " RESET "  - So tien: " RED "%lld VND\n" RESET, maxChi);
+        snprintf(buf, sizeof(buf), "  - Chi nhieu nhat: %s", maxCatName);
+        ROW_PLAIN(buf);
+
+        snprintf(numStr, sizeof(numStr), "%lld", maxChi);
+        snprintf(buf,    sizeof(buf),    "  - So tien:  %s VND", numStr);
+        ROW_MONEY("  - So tien:  ", RED, numStr, " VND", (int)strlen(buf));
+
+        if (thu > 0) {
+            int pct = (int)(chi * 100 / thu);
+            const char* pcol = pct > 80 ? RED : pct > 50 ? YELLOW : GREEN;
+            snprintf(numStr, sizeof(numStr), "%d%%", pct);
+            snprintf(buf,    sizeof(buf),    "  - Chi / Thu: %s", numStr);
+            ROW_MONEY("  - Chi / Thu: ", pcol, numStr, "", (int)strlen(buf));
+        }
     } else {
-        printf(CYAN " \xba " RESET "  - Thoi gian nay ban khong co khoan chi nao.\n");
+        ROW_PLAIN("  - Thoi gian nay ban khong co khoan chi nao.");
     }
 
-    printf(CYAN " \xba \n");
-    printf(CYAN " \xba " YELLOW "[3] LOI KHUYEN:\n" RESET);
-    
-    // Logic Lời Khuyên
+    ROW_EMPTY();
+
+    // [3] LOI KHUYEN
+    ROW_HDR("[3] LOI KHUYEN:");
+
     if (chi > thu && thu > 0) {
-        printf(CYAN " \xba " RESET "  => " RED "CANH BAO:" RESET " Ban dang chi tieu vuot muc thu nhap!\n");
-        printf(CYAN " \xba " RESET "  => Can cat giam ngay lap tuc de tranh tham hut nang.\n");
+        snprintf(buf, sizeof(buf), "  => CANH BAO: Chi tieu vuot muc thu nhap!");
+        ROW_MONEY("  => CANH BAO:", RED, " Chi tieu vuot muc thu nhap!", "", (int)strlen(buf));
+        ROW_PLAIN("  => Can cat giam ngay de tranh tham hut nang.");
     } else if (thu == 0 && chi > 0) {
-        printf(CYAN " \xba " RESET "  => " RED "CANH BAO:" RESET " Ban chua co thu nhap nhung van dang tieu tien.\n");
-    } else if (chi > (thu * 0.8)) {
-        printf(CYAN " \xba " RESET "  => Ban da xai hon 80%% thu nhap. Nen de danh them khoan du phong.\n");
-    } else if (thu > 0 && chi <= (thu * 0.5)) {
-        printf(CYAN " \xba " RESET "  => " GREEN "TUYET VOI:" RESET " Ban tiet kiem rat tot. Tai chinh hien rat on dinh!\n");
+        snprintf(buf, sizeof(buf), "  => CANH BAO: Chua co thu nhap nhung van dang tieu tien.");
+        ROW_MONEY("  => CANH BAO:", RED, " Chua co thu nhap nhung van dang tieu tien.", "", (int)strlen(buf));
+    } else if (chi > (long long)(thu * 0.8)) {
+        ROW_PLAIN("  => Da xai hon 80% thu nhap. Nen de danh them khoan du phong.");
+    } else if (thu > 0 && chi <= (long long)(thu * 0.5)) {
+        snprintf(buf, sizeof(buf), "  => TUYET VOI: Tiet kiem rat tot. Tai chinh hien rat on dinh!");
+        ROW_MONEY("  => TUYET VOI:", GREEN, " Tiet kiem rat tot. Tai chinh hien rat on dinh!", "", (int)strlen(buf));
     } else {
-        printf(CYAN " \xba " RESET "  => Tinh hinh tai chinh can bang. Ban dang kiem soat tot!\n");
+        ROW_PLAIN("  => Tinh hinh tai chinh can bang. Ban dang kiem soat tot!");
     }
 
-    // Logic loi khuyen rieng cho danh muc
     if (strcmp(maxCatName, "Giai_tri") == 0 || strcmp(maxCatName, "Mua_sam") == 0) {
-        printf(CYAN " \xba " RESET "  => Danh muc tieu tien nhieu nhat la Giai tri / Mua sam.\n");
-        printf(CYAN " \xba " RESET "  => Nen can nhac kiem soat lai cac so thich ca nhan nay.\n");
+        ROW_PLAIN("  => Danh muc chi nhieu la Giai tri / Mua sam.");
+        ROW_PLAIN("  => Nen kiem soat lai cac so thich ca nhan nay.");
     }
-    
-    printBoxBot(71);
+
+    ROW_EMPTY();
+    printBoxBot(BW + 2);
+
+#undef BW
+#undef ROW_PLAIN
+#undef ROW_HDR
+#undef ROW_EMPTY
+#undef ROW_MONEY
 }
+
 // ==========================================
 // FILE I/O
 // ==========================================
+// hàm quét file text để nạp dữ liệu cũ vào danh sách liên kết khi khởi động ứng dụng
 void loadFromFile(Node** head) {
     FILE* file = fopen("data.txt", "r");
     if (file == NULL) {
@@ -667,6 +760,7 @@ void loadFromFile(Node** head) {
         printf(GREEN "\n[*] Da tai %d giao dich tu file.\n" RESET, count);
 }
 
+// hàm duyệt danh sách liên kết để ghi đè toàn bộ dữ liệu sạch vào ổ cứng khi thoát
 void saveToFile(Node* head) {
     FILE* file = fopen("data.txt", "w");
     if (file == NULL) {
@@ -686,6 +780,7 @@ void saveToFile(Node* head) {
     printf(GREEN "\n[*] Da luu %d giao dich vao 'data.txt'.\n" RESET, count);
 }
 
+// hàm duyệt vòng lặp giải phóng vùng nhớ heap của từng node tránh rò rỉ ram
 void freeMemory(Node** head) {
     Node* cur = *head;
     while (cur != NULL) {
@@ -699,9 +794,9 @@ void freeMemory(Node** head) {
 // ==========================================
 // MENU CHINH
 // ==========================================
+// hàm hiển thị danh sách các lựa chọn chức năng chính của ứng dụng
 void showMenu() {
     int w = 45;
-
     printBoxTop(w);
     printf(CYAN " \xba" YELLOW BOLD "%8s%s%9s" RESET CYAN "\xba\n" RESET, "", "QUAN LY THU CHI CA NHAN v4.1", "");
     printBoxMid(w);
