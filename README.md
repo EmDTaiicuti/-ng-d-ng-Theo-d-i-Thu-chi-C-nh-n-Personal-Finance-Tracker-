@@ -74,13 +74,13 @@ Personal-Finance-Tracker-Project/
 ### Biên dịch
 
 ```bash
-gcc main.c -o finance_tracker.exe
+gcc main.c -o finance.exe
 ```
 
 ### Chạy
 
 ```bash
-.\finance_tracker.exe
+.\finance.exe
 ```
 
 Chương trình tự động tải `data.txt` khi khởi động. Nếu file chưa tồn tại (lần đầu chạy), chương trình sẽ thông báo và tạo mới khi bạn chọn **Lưu & Thoát**.
