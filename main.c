@@ -637,14 +637,14 @@ void analyzeAI(Node* head) {
     char title[100];
     snprintf(title, sizeof(title), "PHAN TICH TAI CHINH (%s)", timeStr);
     int tlen = (int)strlen(title);
-    int padL = (BW + 2 - tlen) / 2;
-    int padR = (BW + 2) - tlen - padL;
+    int padL = (BW + 1 - tlen) / 2;
+    int padR = (BW + 1) - tlen - padL;
     if(padL < 1) padL = 1;
     if(padR < 1) padR = 1;
 
-    printBoxTop(BW + 2);
+    printBoxTop(BW + 1);
     printf(CYAN " \xba" YELLOW "%*s%s%*s" CYAN "\xba\n" RESET, padL, "", title, padR, "");
-    printBoxMid(BW + 2);
+    printBoxMid(BW + 1);
 
     char buf[128], numStr[64];
 
@@ -721,7 +721,7 @@ void analyzeAI(Node* head) {
     }
 
     ROW_EMPTY();
-    printBoxBot(BW + 2);
+    printBoxBot(BW + 1);
 
 #undef BW
 #undef ROW_PLAIN
